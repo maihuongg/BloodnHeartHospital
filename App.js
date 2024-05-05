@@ -20,6 +20,7 @@ import ForgotPassword from './src/screens/ForgotPassword';
 import CodeScreen from './src/screens/CodeScreen';
 import { store, persistor } from './src/redux/store'; // Import store and persistor
 import ProfileScreen from './src/screens/ProfileScreen';
+import DetailEvent from './src/screens/DetailEvent';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 import * as Device from 'expo-device';
@@ -31,10 +32,11 @@ const AppNavigator = () => {
         {/* <Stack.Screen name="HomeScreen" component={HomeScreen} /> */}
 
 
-        <Stack.Screen name="Auth" component={AuthStack} />
+        {/* <Stack.Screen name="Auth" component={AuthStack} /> */}
         <Stack.Screen name="Home" component={HomeTab} options={{ headerShown: false }} />
 
         <Stack.Screen name="InformationScreen" component={InformationTab} />
+        <Stack.Screen name="DetailEvent" component={DetailEvent} />
 
         <Stack.Screen name="Profile" component={ProfileScreen} />
 

@@ -14,6 +14,8 @@ import moment from "moment";
 import isEmpty from "validator/lib/isEmpty";
 import { Alert } from 'react-native';
 const HomeScreen = () => {
+
+
   const user = useSelector((state) => state.auth.login.currentUser);
   const userId = user?._id;
   const accessToken = user?.accessToken;
@@ -136,6 +138,10 @@ const HomeScreen = () => {
     } catch (error) {
       Alert.alert("Lỗi", error);
     }
+  }
+  const handleNavigateToDetailEvent = ()=>{
+    navigation.navigate('DetailEvent');
+
   }
 
   return (
