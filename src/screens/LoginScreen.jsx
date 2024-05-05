@@ -6,13 +6,10 @@ import { Alert } from 'react-native';
 import isEmpty from "validator/lib/isEmpty";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-    userprofileStart,
-    userprofileSuccess,
-    userprofileFailed,
-    allEventStart,
-    allEventSuccess,
-    allEventFailed,
-} from "../redux/userSlice";
+    hospitalprofileStart,
+    hospitalprofileSuccess,
+    hospitalrofileFailed
+}from "../redux/hospitalSlice";
 import {
     loginFailed,
     loginStart,
@@ -54,53 +51,36 @@ const LoginScreen = () => {
                     const userId = data._id;
                     console.log('userId', userId);
                     AsyncStorage.setItem('token', data.accessToken);
-
                     const accessToken = data.accessToken;
-                    console.log("five");
-                    dispatch(allEventStart());
-                    console.log("five");
-                    try {
-                        const response = await fetch(`${baseUrl}/v1/user/bestfiveevent`, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json'
+                    const isHospital = data.isHospital;
+                    if (isHospital) {
+                        console.log('user', 'fdffff');
+                        dispatch(hospitalprofileStart());
+                        console.log('user', 'fdffff');
+                        try {
+                            const response1 = await fetch(`${baseUrl}/v1/hospital/profile/` + userId, {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    token: `Bearer ${accessToken}`
+                                }
+                            });
+                            console.log('user', 'fdffff');
+                            if (!response1.ok) {
+                                dispatch(hospitalrofileFailed());
+                                Alert.alert('Lỗi', 'Đã xảy lỗi ');
+                            } else {
+                                const data1 = await response1.json();
+                                console.log('data', data1)
+                                dispatch(hospitalprofileSuccess(data1));
+                                navigation.navigate('Home');
                             }
-                        });
-
-                        if (!response.ok) {
-                            console.log("Get Best Event Fail.")
-                            dispatch(allEventFailed());
+                        } catch (error) {
+                            dispatch(hospitalrofileFailed());
+                            Alert.alert('Lỗi', 'Đã xảy ra lỗi không mong muốn.');
                         }
-                        else {
-                            const bestEvent = await response.json();
-                            console.log("five");
-                            dispatch(allEventSuccess(bestEvent));
-
-                        }
-                    } catch (error) {
-                        console.error("Error fetching data:", error);
-                        dispatch(allEventFailed());
-                    }
-                    dispatch(userprofileStart());
-                    try {
-                        const response1 = await fetch(`${baseUrl}/v1/user/profile/` + userId, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                token: `Bearer ${accessToken}`
-                            }
-                        });
-                        if (!response1.ok) {
-                            dispatch(userprofileFailed());
-                            Alert.alert('Lỗi', 'Đã xảy ');
-                        } else {
-                            const data1 = await response1.json();
-                            dispatch(userprofileSuccess(data1));
-                            navigation.navigate('Home');
-                        }
-                    } catch (error) {
-                        dispatch(userprofileFailed());
-                        Alert.alert('Lỗi', 'Đã xảy ra lỗi không mong muốn.');
+                    } else {
+                        Alert.alert('Thất bại', 'Tài khoản này không phải của bệnh viện.');
                     }
                 }
 
@@ -145,11 +125,6 @@ const LoginScreen = () => {
             <TouchableOpacity onPress={handleForgotPassword}>
                 <Text className="text-blue font-bold mx-auto justify-center">Quên mật khẩu ?</Text>
             </TouchableOpacity>
-            <View className="flex-row justify-center m-2">
-                <Text className="text-black ">Chưa có tài khoản ?</Text>
-                <TouchableOpacity onPress={handleDangKy}>
-                    <Text className="text-blue font-bold ml-1">Đăng ký ngay</Text>
-                </TouchableOpacity></View>
         </View>
     );
 };

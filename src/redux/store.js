@@ -2,6 +2,7 @@ import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
 import userReducer from "./userSlice";
 import eventReducer from "./eventSlice";
+import hospitalReducer from "./hospitalSlice";
 import {
   persistStore,
   persistReducer,
@@ -20,7 +21,7 @@ const persistConfig = {
 };
 //const rootReducer = combineReducers({ auth: authReducer});
 //const rootReducer = combineReducers({ auth: authReducer, user: userReducer});
-const rootReducer = combineReducers({ auth: authReducer, user: userReducer, event: eventReducer });
+const rootReducer = combineReducers({ auth: authReducer, user: userReducer, event: eventReducer, hospital: hospitalReducer});
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({

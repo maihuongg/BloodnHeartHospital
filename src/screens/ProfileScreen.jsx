@@ -14,29 +14,25 @@ import moment from "moment";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import {
-    userprofileStart,
-    userprofileSuccess,
-    userprofileFailed,
-} from "../redux/userSlice";
+    hospitalprofileStart,
+    hospitalprofileSuccess,
+    hospitalrofileFailed
+} from "../redux/hospitalSlice";
 import baseUrl from '../utils/constant';
 const ProfileScreen = () => {
-
 
     const user = useSelector((state) => state.auth.login.currentUser);
     const userId = user?._id;
     const accessToken = user?.accessToken
-    const userPro = useSelector((state) => state.user.profile.getUser);
+    const hospitalProfile = useSelector((state) => state.hospital.profile.gethospital);
     const navigation = useNavigation();
     const dispatch = useDispatch();
 
-    const [fullName, setfullName] = useState(userPro?.fullName);
-    const [birthDay, setbirthDay] = useState(moment(userPro?.birthDay).format('DD/MM/YYYY'));
-
-    const [gender, setGender] = useState(userPro?.gender);
-    const [bloodgroup, setbloodGroup] = useState(userPro?.bloodgroup);
-    const [address, setAddress] = useState(userPro?.address);
-    const [phone, setPhone] = useState(userPro?.phone);
-    const [email, setEmail] = useState(userPro?.email);
+    const [hospitalName, setHospitalName] = useState(hospitalProfile?.hospitalName);
+    const [leaderName, setLeaderName] = useState(hospitalProfile?.leaderName);
+    const [address, setAddress] = useState(hospitalProfile?.address);
+    const [phone, setPhone] = useState(hospitalProfile?.phone);
+    const [email, setEmail] = useState(hospitalProfile?.email);
 
     const [modalVisible, setModalVisible] = useState(false)
     const [showModal, setShowModal] = useState(false);
@@ -50,24 +46,6 @@ const ProfileScreen = () => {
         setShowModal(false);
     };
 
-    const bloodGroupData = [
-        { key: 'A-', value: 'A-' },
-        { key: 'A+', value: 'A+' },
-        { key: 'B-', value: 'B-' },
-        { key: 'B+', value: 'B+' },
-        { key: 'AB-', value: 'AB-' },
-        { key: 'AB+', value: 'AB+' },
-        { key: 'O-', value: 'O-' },
-        { key: 'O+', value: 'O+' },
-
-        // Thêm các nhóm máu khác nếu cần
-    ];
-
-    const data = [
-        { key: 'Nam', value: 'Nam' },
-        { key: 'Nữ', value: 'Nữ' },
-
-    ]
 
     useEffect(() => {
         (async () => {
@@ -78,9 +56,9 @@ const ProfileScreen = () => {
             }
         })();
         const handleProfile = async () => {
-            dispatch(userprofileStart());
+            dispatch(hospitalprofileStart());
             try {
-                const response1 = await fetch(`${baseUrl}/v1/user/profile/` + userId, {
+                const response1 = await fetch(`${baseUrl}/v1/hospital/profile/` + userId, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -88,34 +66,31 @@ const ProfileScreen = () => {
                     }
                 });
                 if (!response1.ok) {
-                    dispatch(userprofileFailed());
+                    dispatch(hospitalrofileFailed());
+                    Alert.alert('Lỗi', 'Đã xảy lỗi ');
                 } else {
                     const data1 = await response1.json();
-                    dispatch(userprofileSuccess(data1));
-                    console.log("bbb");
+                    dispatch(hospitalprofileSuccess(data1));
                 }
             } catch (error) {
-                dispatch(userprofileFailed());
+                dispatch(hospitalrofileFailed());
+                Alert.alert('Lỗi', 'Đã xảy ra lỗi không mong muốn.');
             }
         }
         handleProfile();
     }, [dispatch]);
 
     const handleUpdate = async (e) => {
-        const [day, month, year] = birthDay.split("/"); // Tách ngày, tháng, năm từ chuỗi
-        const formattedDate = new Date(`${year}-${month}-${day}`);
         const updateUser = {
-            fullName: fullName,
-            birthDay: formattedDate,
-            gender: gender,
-            bloodgroup: bloodgroup,
+            hospitalName: hospitalName,
+            leaderName: leaderName,
             phone: phone,
             email: email,
             address: address,
         };
-        dispatch(userprofileStart());
+        dispatch(hospitalprofileStart());
         try {
-            const response = await fetch(`${baseUrl}/v1/user/profile/` + userId, {
+            const response = await fetch(`${baseUrl}/v1/hospital/profile-update/` + userId, {
                 method: 'PUT',
                 body: JSON.stringify(updateUser),
                 headers: {
@@ -125,17 +100,17 @@ const ProfileScreen = () => {
             });
 
             if (!response.ok) {
-                dispatch(userprofileFailed());
+                dispatch(hospitalrofileFailed());
                 Alert.alert('Thất bại', 'Không thể cập nhật thông tin');
             } else {
                 const data = await response.json();
-                dispatch(userprofileSuccess(data));
+                dispatch(hospitalprofileSuccess(data));
                 setModalVisible(false);
                 Alert.alert('Thành công', 'Đã cập nhật thông tin.');
                 navigation.navigate('Profile');
             }
         } catch (error) {
-            dispatch(userprofileFailed());
+            dispatch(hospitalrofileFailed());
             Alert.alert('Lỗi', 'Đã xảy ra lỗi không mong muốn.');
         }
     }
@@ -150,7 +125,7 @@ const ProfileScreen = () => {
             });
 
             if (!result.canceled) {
-                
+
                 console.log("uri", result.assets[0].uri);
                 const base64Image = await convertImageToBase64(result.assets[0].uri);
                 console.log("Base64 Image:", base64Image);
@@ -183,10 +158,10 @@ const ProfileScreen = () => {
         const formData = new FormData();
         formData.append('images', selectedImage);
 
-        dispatch(userprofileStart());
+        dispatch(hospitalprofileStart());
 
         try {
-            const response = await fetch(`${baseUrl}/v1/user/profileimage/` + userId, {
+            const response = await fetch(`${baseUrl}/v1/hospital/profile-update-image/` + userId, {
                 method: 'PUT',
                 body: formData,
                 headers: {
@@ -195,16 +170,16 @@ const ProfileScreen = () => {
             });
 
             if (!response.ok) {
-                dispatch(userprofileFailed());
+                dispatch(hospitalrofileFailed());
                 Alert.alert('Thất bại', 'Không thể cập nhật hình ảnh');
             } else {
                 const data = await response.json();
-                dispatch(userprofileSuccess(data));
+                dispatch(hospitalprofileSuccess(data));
                 Alert.alert('Thành công', 'Đã cập nhật ảnh đại diện.');
                 navigation.navigate('Profile');
             }
         } catch (error) {
-            dispatch(userprofileFailed());
+            dispatch(hospitalrofileFailed());
             Alert.alert('Lỗi', 'Đã xảy ra lỗi không mong muốn.');
         }
     }
@@ -224,7 +199,7 @@ const ProfileScreen = () => {
             <View className="flex-row w-32 h-32 bg-white  rounded-full mx-auto py-2 -mt-16 shadow-md">
                 <Image
                     className="w-28 h-28 rounded-full mx-auto items-center justify-centerr"
-                    source={{ uri: userPro?.images }} ></Image>
+                    source={{ uri: hospitalProfile?.images }} ></Image>
                 <TouchableOpacity style={{ position: 'absolute', bottom: 10, right: 10 }} onPress={handleOpenModal}>
                     <FontAwesome5 name="edit" size={20} style={{ color: 'rgb(8, 145, 178)' }} />
                 </TouchableOpacity>
@@ -243,7 +218,7 @@ const ProfileScreen = () => {
                                 <Text>Ảnh đại diện</Text>
 
                                 <Image
-                                    source={{ uri: selectedImage ? selectedImage : (userPro?.images ? userPro.images : '') }}
+                                    source={{ uri: selectedImage ? selectedImage : (hospitalProfile?.images ? hospitalProfile.images : '') }}
                                     style={{ width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: 'rgb(8, 145, 178)' }}
                                 />
                                 <TouchableOpacity onPress={handleChooseImage}>
@@ -252,7 +227,7 @@ const ProfileScreen = () => {
                                     </View>
                                 </TouchableOpacity>
                                 <View style={{ flexDirection: 'row', marginTop: 20 }}>
-                                    <Button title="Lưu lại" disabled={!selectedImage} style={{ marginRight: 10 }} onPress={handleUpdateImage}/>
+                                    <Button title="Lưu lại" disabled={!selectedImage} style={{ marginRight: 10 }} onPress={handleUpdateImage} />
                                     <Button title="Hủy" onPress={handleCloseModal} />
                                 </View>
                             </View>
@@ -263,33 +238,29 @@ const ProfileScreen = () => {
             </View>
 
             <View className=" justify-center items-center mx-2 ">
-                <Text className="text-black font-bold text-[22px]"> {userPro?.fullName}</Text>
+                <Text className="text-black font-bold text-[22px]"> {hospitalProfile?.hospitalName}</Text>
             </View>
 
             <View className="bg-white mx-4 rounded-xl my-3 py-2 shadow-sm">
                 <View className="flex-row mx-2 items-center">
                     <MaterialCommunityIcons name="information" size={24} color="#0891b2" />
-                    <Text className="text-blue font-bold text-[20px]"> Thông tin cá nhân </Text>
+                    <Text className="text-blue font-bold text-[20px]"> Thông tin bệnh viện </Text>
                 </View>
                 <View className="flex-row mx-2">
-                    <Text className="text-black font-bold text-[18px]">CCCD/CMND :  </Text>
-                    <Text className="text-black font-normal text-[18px] ml-auto"> {userPro?.cccd}  </Text>
+                    <Text className="text-black font-bold text-[18px]">Số định danh :  </Text>
+                    <Text className="text-black font-normal text-[18px] ml-auto"> {hospitalProfile?.cccd}  </Text>
                 </View>
                 <View className="flex-row mx-2">
-                    <Text className="text-black font-bold text-[18px]">Họ tên: </Text>
-                    <Text className="text-black font-normal text-[18px] ml-auto"> {userPro?.fullName}  </Text>
+                    <Text className="text-black font-bold text-[18px]">Tên bệnh viện : </Text>
+                    <Text className="text-black font-normal text-[18px] ml-auto" style={{ flexWrap: 'wrap', maxWidth: '60%', textAlign: 'right' }}>
+                        {hospitalProfile?.hospitalName}
+                    </Text>
+
+
                 </View>
                 <View className="flex-row mx-2">
-                    <Text className="text-black font-bold text-[18px]">Ngày sinh :  </Text>
-                    <Text className="text-black font-normal text-[18px] ml-auto"> {moment(userPro?.birthDay).format('DD/MM/YYYY')} </Text>
-                </View>
-                <View className="flex-row mx-2">
-                    <Text className="text-black font-bold text-[18px]">Giới tính :  </Text>
-                    <Text className="text-black font-normal text-[18px] ml-auto"> {userPro?.gender}</Text>
-                </View>
-                <View className="flex-row mx-2">
-                    <Text className="text-black font-bold text-[18px]">Nhóm máu </Text>
-                    <Text className="text-black font-normal text-[18px] ml-auto"> {userPro?.bloodgroup} </Text>
+                    <Text className="text-black font-bold text-[18px]">Tên người đại diện : </Text>
+                    <Text className="text-black font-normal text-[18px] ml-auto"> {hospitalProfile?.leaderName} </Text>
                 </View>
             </View>
             <View className="bg-white mx-4 rounded-xl my-2 py-2 shadow-sm">
@@ -299,15 +270,15 @@ const ProfileScreen = () => {
                 </View>
                 <View className="flex-row mx-2">
                     <Text className="text-black font-bold text-[18px]">Số điện thoại :  </Text>
-                    <Text className="text-black font-normal text-[18px] ml-auto">{userPro?.phone}  </Text>
+                    <Text className="text-black font-normal text-[18px] ml-auto">{hospitalProfile?.phone}  </Text>
                 </View>
                 <View className="flex-row mx-2">
                     <Text className="text-black font-bold text-[18px]">Email : </Text>
-                    <Text className="text-black font-normal text-[18px] ml-auto">{userPro?.email} </Text>
+                    <Text className="text-black font-normal text-[18px] ml-auto">{hospitalProfile?.email} </Text>
                 </View>
                 <View className="flex-row mx-2">
-                    <Text className="text-black font-bold text-[18px]">Địa chỉ :
-                        <Text className="text-black font-normal text-[18px] whitespace-pre-wrap "> {userPro?.address} </Text></Text>
+                    <Text className="text-black font-bold text-[18px]">Địa chỉ : </Text>
+                    <Text className="text-black font-normal text-[18px] ml-auto" style={{ flexWrap: 'wrap', maxWidth: '70%', textAlign: 'right' }}> {hospitalProfile?.address} </Text>
                 </View>
 
             </View>
@@ -332,68 +303,48 @@ const ProfileScreen = () => {
                         <ScrollView>
                             <View className=" mx-2 bg-white p-4 rounded-md ">
                                 {/* Đặt các trường để người dùng có thể chỉnh sửa thông tin */}
-                                <Text className="text-xl font-bold text-blue mb-2">Chỉnh sửa thông tin cá nhân</Text>
-                                <Text className="text-black text-[16px] font-bold my-2"> CCCD/CMND </Text>
+                                <Text className="text-xl font-bold text-blue mb-2">Chỉnh sửa thông tin bệnh viện</Text>
+                                <Text className="text-black text-[16px] font-bold my-2"> Số định danh </Text>
                                 <TextInput
-                                    defaultValue={userPro?.cccd}
-                                    placeholder="Nhập số CCCD/CMND"
+                                    defaultValue={hospitalProfile?.cccd}
+                                    placeholder="Nhập số định danh"
                                     className="border border-gray-300 rounded-md p-2"
                                     editable={false} />
 
-                                <Text className="text-black text-[16px] font-bold my-2"> Họ tên </Text>
+                                <Text className="text-black text-[16px] font-bold my-2"> Tên bệnh viện </Text>
                                 <TextInput
-                                    defaultValue={userPro?.fullName}
-                                    onChangeText={(text) => setfullName(text)}
-                                    placeholder="Họ và tên"
+                                    defaultValue={hospitalProfile?.hospitalName}
+                                    onChangeText={(text) => setHospitalName(text)}
+                                    placeholder="Tên bệnh viện"
                                     className="border border-gray-300 rounded-md p-2" />
-                                <Text className="text-black text-[16px] font-bold my-2"> Ngày sinh </Text>
+                                <Text className="text-black text-[16px] font-bold my-2"> Tên người đại diện </Text>
                                 <TextInput
-                                    defaultValue={moment(userPro?.birthDay).format('DD/MM/YYYY')}
-                                    onChangeText={(text) => setbirthDay(text)}
-                                    placeholder="15/05/1999"
+                                    defaultValue={hospitalProfile?.leaderName}
+                                    onChangeText={(text) => setLeaderName(text)}
+                                    placeholder="Tên người đại diện"
                                     className="border border-gray-300 rounded-md p-2" />
-                                <View className="flex-row">
-                                    <View className="flex-col w-[45%]">
-                                        <Text className="text-black text-[16px] font-bold my-2"> Giới tính </Text>
-                                        <SelectList
-                                            setSelected={(val) => setGender(val || userPro?.gender)}
-                                            data={data}
-                                            save="value"
-                                        />
-
-                                    </View>
-                                    <View className="flex-col w-[45%] ml-auto">
-                                        <Text className="text-black text-[16px] font-bold my-2"> Nhóm máu </Text>
-                                        <SelectList
-                                            setSelected={(val) => setbloodGroup(val || userPro?.bloodgroup)}
-                                            data={bloodGroupData}
-                                            save="value"
-                                        />
-                                    </View>
-                                </View>
-
                                 <Text className="text-black text-[16px] font-bold my-2"> Email </Text>
                                 <TextInput
-                                    defaultValue={userPro?.email}
+                                    defaultValue={hospitalProfile?.email}
                                     onChangeText={(text) => setEmail(text)}
                                     placeholder="Email"
                                     className="border border-gray-300 rounded-md  p-2" />
                                 <Text className="text-black text-[16px] font-bold my-2"> Số điện thoại </Text>
                                 <TextInput
-                                    defaultValue={userPro?.phone}
+                                    defaultValue={hospitalProfile?.phone}
                                     onChangeText={(text) => setPhone(text)}
                                     placeholder="0955662301"
                                     className="border border-gray-300 rounded-md  p-2" />
                                 <Text className="text-black text-[16px] font-bold my-2"> Địa chỉ </Text>
                                 <TextInput
-                                    defaultValue={userPro?.address}
+                                    defaultValue={hospitalProfile?.address}
                                     onChangeText={(text) => setAddress(text)}
                                     placeholder="1 Võ Văn Ngân, TP.Thủ Đức, TPHCM"
                                     className="border border-gray-300 rounded-md  p-2" />
 
 
                                 {/* Khi hoàn thành, bạn cần một cách nào đó để lưu thông tin đã chỉnh sửa và đóng modal */}
-                                <TouchableOpacity onPress={handleUpdate}>
+                                <TouchableOpacity onPress={handleUpdate} >
                                     <View className="justify-center bg-blue mx-auto my-4 p-3 rounded-md">
 
                                         <Text className="text-white font-bold text-[16px]">Lưu thay đổi</Text>
