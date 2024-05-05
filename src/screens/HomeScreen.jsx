@@ -18,9 +18,15 @@ import {
   hospitalFailed
 } from "../redux/eventSlice";
 const HomeScreen = () => {
+  const navigation = useNavigation();
+
   const user = useSelector((state) => state.auth.login.currentUser);
   const userId = user?._id;
   const accessToken = user?.accessToken;
+  const handleNavigateToDetailEvent = ()=>{
+    navigation.navigate('DetailEvent');
+
+  }
 
   return (
     <SafeAreaView className=" flex-1 bg-white pt-6">
@@ -37,7 +43,7 @@ const HomeScreen = () => {
         </View>
       </View>
       <ScrollView>
-        <View className="flex  bg-blue my-2">
+        <View className="flex  bg-blue mb-2">
           <Text className="text-white font-bold text-[16px] mt-2 mx-4">Xin chào, Bệnh viện Quốc tế </Text>
           <Text className="text-white font-normal text-[14px]  mx-4">Chúc bạn ngày mới tràn đầy năng lượng ! </Text>
           <View className="flex-row px-4 py-2 m-2 border-2 border-blue rounded-lg bg-gray">
@@ -67,6 +73,7 @@ const HomeScreen = () => {
 
         <View className=" bg-silver">
           {/* Item từng event bắt đầu ở đây */}
+          
           <View className="flex-row shadow-sm border-b-2 bg-white rounded-md items-center">
             <View className="flex-col m-2 p-2 ">
               <Text className="text-black font-semibold text-[16px]"> Tên sự kiện </Text>
@@ -74,71 +81,9 @@ const HomeScreen = () => {
               <Text className=" text-red font-semibold text-[16px]"> Ngày kết thúc : 17/02/2024</Text>
             </View>
             <View className="flex-row">
-              <TouchableOpacity className="bg-[#fcf00a] p-1 items-center justify-center ">
-                <AntDesign name="eye" size={26} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-red p-1 ml-4 items-center justify-center">
-                <AntDesign name="closecircle" size={22} color="white" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View className="flex-row shadow-sm border-b-2 bg-white rounded-md items-center">
-            <View className="flex-col m-2 p-2 ">
-              <Text className="text-black font-semibold text-[16px]"> Tên sự kiện </Text>
-              <Text className=" text-metal font-semibold text-[16px]"> Ngày bắt đầu : 10/02/2024</Text>
-              <Text className=" text-red font-semibold text-[16px]"> Ngày kết thúc : 17/02/2024</Text>
-            </View>
-            <View className="flex-row">
-              <TouchableOpacity className="bg-[#fcf00a] p-1 items-center justify-center ">
-                <AntDesign name="eye" size={26} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-red p-1 ml-4 items-center justify-center">
-                <AntDesign name="closecircle" size={22} color="white" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View className="flex-row shadow-sm border-b-2 bg-white rounded-md items-center">
-            <View className="flex-col m-2 p-2 ">
-              <Text className="text-black font-semibold text-[16px]"> Tên sự kiện </Text>
-              <Text className=" text-metal font-semibold text-[16px]"> Ngày bắt đầu : 10/02/2024</Text>
-              <Text className=" text-red font-semibold text-[16px]"> Ngày kết thúc : 17/02/2024</Text>
-            </View>
-            <View className="flex-row">
-              <TouchableOpacity className="bg-[#fcf00a] p-1 items-center justify-center ">
-                <AntDesign name="eye" size={26} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-red p-1 ml-4 items-center justify-center">
-                <AntDesign name="closecircle" size={22} color="white" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View className="flex-row shadow-sm border-b-2 bg-white rounded-md items-center">
-            <View className="flex-col m-2 p-2 ">
-              <Text className="text-black font-semibold text-[16px]"> Tên sự kiện </Text>
-              <Text className=" text-metal font-semibold text-[16px]"> Ngày bắt đầu : 10/02/2024</Text>
-              <Text className=" text-red font-semibold text-[16px]"> Ngày kết thúc : 17/02/2024</Text>
-            </View>
-            <View className="flex-row">
-              <TouchableOpacity className="bg-[#fcf00a] p-1 items-center justify-center ">
-                <AntDesign name="eye" size={26} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-red p-1 ml-4 items-center justify-center">
-                <AntDesign name="closecircle" size={22} color="white" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View className="flex-row shadow-sm border-b-2 bg-white rounded-md items-center">
-            <View className="flex-col m-2 p-2 ">
-              <Text className="text-black font-semibold text-[16px]"> Tên sự kiện </Text>
-              <Text className=" text-metal font-semibold text-[16px]"> Ngày bắt đầu : 10/02/2024</Text>
-              <Text className=" text-red font-semibold text-[16px]"> Ngày kết thúc : 17/02/2024</Text>
-            </View>
-            <View className="flex-row">
-              <TouchableOpacity className="bg-[#fcf00a] p-1 items-center justify-center ">
+              <TouchableOpacity
+                onPress={handleNavigateToDetailEvent}
+                className="bg-[#fcf00a] p-1 items-center justify-center ">
                 <AntDesign name="eye" size={26} color="black" />
               </TouchableOpacity>
               <TouchableOpacity className="bg-red p-1 ml-4 items-center justify-center">
