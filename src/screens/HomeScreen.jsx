@@ -207,12 +207,11 @@ const HomeScreen = () => {
         </View>
 
         <View className="flex-row bg-silver justify-center items-center p-2">
-          <Text className="font-extrabold text-black text-[16px]">                              </Text>
           <Text className="font-extrabold text-black text-[16px]">Quản lý sự kiện</Text>
-          <Text className="font-extrabold text-black text-[16px]">                            </Text>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <MaterialIcons name="add" size={20} color="black" />
-          </TouchableOpacity>
+          <View className="ml-auto">
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <MaterialIcons name="add" size={20} color="black" />
+            </TouchableOpacity></View>
         </View>
         <Modal
           animationType="slide"
