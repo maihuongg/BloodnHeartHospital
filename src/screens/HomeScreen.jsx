@@ -13,6 +13,11 @@ import { AntDesign } from '@expo/vector-icons';
 import moment from "moment";
 import isEmpty from "validator/lib/isEmpty";
 import { Alert } from 'react-native';
+import {
+  eventProfileStart,
+  eventProfileSuccess,
+  eventProfileFailed,
+} from "../redux/eventSlice";
 const HomeScreen = () => {
 
 
@@ -22,6 +27,7 @@ const HomeScreen = () => {
   const hospitalProfile = useSelector((state) => state.hospital.profile.gethospital);
   const hospitalId = hospitalProfile?._id;
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const [data, setData] = useState([]);
   const [modalVisible, setModalVisible] = useState(false)
   const [close, setModalClose] = useState(false)
@@ -139,9 +145,26 @@ const HomeScreen = () => {
       Alert.alert("Lỗi", error);
     }
   }
-  const handleNavigateToDetailEvent = ()=>{
-    navigation.navigate('DetailEvent');
-
+  const handleNavigateToDetailEvent = async (eventId) => {
+    dispatch(eventProfileStart());
+    try {
+      const response1 = await fetch(`${baseUrl}/v1/hospital/detail/` + eventId, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!response1.ok) {
+        dispatch(eventProfileFailed());
+      } else {
+        const data1 = await response1.json();
+        console.log('data event', data1);
+        dispatch(eventProfileSuccess(data1));
+        navigation.navigate('DetailEvent');
+      }
+    } catch (error) {
+      dispatch(eventProfileFailed());
+    }
   }
 
   return (
@@ -301,7 +324,7 @@ const HomeScreen = () => {
                 </View>
                 <View className="flex-col pl-2 pt-1 pr-6 ml-auto">
                   <View className="flex-row">
-                    <TouchableOpacity className="bg-[#fcf00a] p-1 items-center justify-center ">
+                    <TouchableOpacity className="bg-[#fcf00a] p-1 items-center justify-center " onPress={() => handleNavigateToDetailEvent(event?._id)}>
                       <AntDesign name="eye" size={26} color="black" />
                     </TouchableOpacity>
                     <TouchableOpacity className="bg-red p-1 ml-4 items-center justify-center" onPress={() => handleCloseEvent(event?._id)}>
