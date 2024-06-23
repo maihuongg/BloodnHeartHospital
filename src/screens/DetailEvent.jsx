@@ -106,7 +106,7 @@ const DetailEvent = () => {
                     const data = await response.json();
                     dispatch(eventProfileSuccess(data.event));
                     setModalVisible(false);
-                    Alert.alert("Chỉnh sửa sự kiện thành công!");
+                    Alert.alert("Thành công", "Bạn đã cập nhật thành công!");
                 }
             } catch (error) {
                 dispatch(eventProfileFailed());
@@ -154,7 +154,7 @@ const DetailEvent = () => {
                     dispatch(eventProfileSuccess(data));
                     console.log('dataEvent', data);
                     setModalVisible1(false);
-                    Alert.alert("Cập nhật trạng thái thành công!");
+                    Alert.alert("Thành công", "Bạn đã cập nhật thành công!");
                 }
             } catch (error) {
                 dispatch(eventProfileFailed());
@@ -197,7 +197,7 @@ const DetailEvent = () => {
                     </View>
                     <View className="flex-row  bg-[#f7e1d7] mx-4 my-2 justify-center">
                         <Text className="text-black font-bold text-[16px] my-4 mx-2">Ngày kết thúc: </Text>
-                        <Text className="text-black font-normal text-[16px] my-4">{moment(eventDetail?.date_start).format('DD/MM/YYYY')}</Text>
+                        <Text className="text-black font-normal text-[16px] my-4">{moment(eventDetail?.date_end).format('DD/MM/YYYY')}</Text>
                     </View>
                     <View className="flex-row  bg-[#e7eaed] mx-4 my-2 justify-center">
                         <Text className="text-black font-bold text-[16px] my-4 mx-2">Số lượng đã đăng ký: </Text>

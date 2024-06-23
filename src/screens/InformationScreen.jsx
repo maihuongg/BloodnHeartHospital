@@ -50,7 +50,7 @@ const InformationScreen = () => {
                         token: `Bearer ${accessToken}`
                     }
                 });
-    
+
                 if (!response.ok) {
                     const err = await response.json();
                     Alert.alert("Thất bại!", err.message);
@@ -64,7 +64,7 @@ const InformationScreen = () => {
         } else {
             Alert.alert("Nhập lại mật khẩu mới không trùng khớp!");
         }
-        
+
     }
 
     const handleLogout = async () => {
@@ -98,9 +98,10 @@ const InformationScreen = () => {
                 <Image
                     className="w-24 h-24 rounded-full ml-4"
                     source={{ uri: hospitalProfile?.images }} ></Image>
-                <View className="flex-column justify-center items-center mx-2 ">
-                    <Text className="text-black font-bold text-[18px]"> {hospitalProfile?.fullName}</Text>
-                    <Text className="text-black text-[16px]"> {hospitalProfile?.address}</Text>
+                <View className="flex-column justify-center items-center mx-2 max-w-[200px]">
+                    <Text className="text-black font-bold text-[16px] text-left overflow-hidden whitespace-nowrap " >
+                        {hospitalProfile?.hospitalName}</Text>
+                    <Text className="text-black text-[16px] text-left">{hospitalProfile?.address}</Text>
                 </View>
             </View>
 

@@ -184,8 +184,8 @@ const HomeScreen = () => {
       <ScrollView>
         <View className="flex  bg-blue my-2">
           <Text className="text-white font-bold text-[16px] mt-2 mx-4">Xin chào, {hospitalProfile.hospitalName} </Text>
-          <Text className="text-white font-normal text-[14px]  mx-4">Chúc bạn ngày mới tràn đầy năng lượng ! </Text>
-          <View className="flex-row px-4 py-2 m-2 border-2 border-blue rounded-lg bg-gray">
+          <Text className="text-white font-normal text-[14px]  mx-4 my-2 ">Chúc bạn ngày mới tràn đầy năng lượng ! </Text>
+          {/* <View className="flex-row px-4 py-2 m-2 border-2 border-blue rounded-lg bg-gray">
             <FontAwesome name="search" size={24} color='#0891b2' />
             <TextInput
               // value={searchQuery}
@@ -197,7 +197,7 @@ const HomeScreen = () => {
                 <MaterialIcons name="arrow-forward" size={20} color="black" />
               </TouchableOpacity>
             </View>
-          </View>
+          </View> */}
           <View className="bg-white mb-2 mx-2 rounded-md h-32 items-center">
             <Image
               source={require('../../assets/hosImg.png')}
@@ -207,12 +207,12 @@ const HomeScreen = () => {
         </View>
 
         <View className="flex-row bg-silver justify-center items-center p-2">
-          <Text className="font-extrabold text-black text-[16px]">                              </Text>
+
           <Text className="font-extrabold text-black text-[16px]">Quản lý sự kiện</Text>
-          <Text className="font-extrabold text-black text-[16px]">                            </Text>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <MaterialIcons name="add" size={20} color="black" />
-          </TouchableOpacity>
+          <View className="ml-auto mr-4">
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <MaterialIcons name="add" size={20} color="black" />
+            </TouchableOpacity></View>
         </View>
         <Modal
           animationType="slide"
