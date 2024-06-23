@@ -207,9 +207,8 @@ const HomeScreen = () => {
         </View>
 
         <View className="flex-row bg-silver justify-center items-center p-2">
-
           <Text className="font-extrabold text-black text-[16px]">Quản lý sự kiện</Text>
-          <View className="ml-auto mr-4">
+          <View className="ml-auto">
             <TouchableOpacity onPress={() => setModalVisible(true)}>
               <MaterialIcons name="add" size={20} color="black" />
             </TouchableOpacity></View>
