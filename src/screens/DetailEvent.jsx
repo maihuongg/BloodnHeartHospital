@@ -36,6 +36,7 @@ const DetailEvent = () => {
     const [showModal, setShowModal] = useState(false);
     const [selected, setSelected] = useState(null); // Khai báo và gán giá trị cho biến selected
     const [userId, setUserId] = useState("");
+    const [data, setData] = useState([]);
     const [eventName, setEventName] = useState(eventDetail?.eventName);
     const [date_start, setDate_start] = useState(eventDetail?.date_start);
     const [date_end, setDate_end] = useState(eventDetail?.date_end);
@@ -56,6 +57,32 @@ const DetailEvent = () => {
     };
 
     const minDate = new Date();
+
+    useEffect(() => {
+        if (!modalVisible) {
+            const handleListUserWithReward = async () => {
+                try {
+                    const response = await fetch(`${baseUrl}/v1/hospital/getuserwithreward/` + eventId, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            token: `Bearer ${accessToken}`
+                        }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log("data ok", data)
+                        setData(data);
+                    }
+                    else return 0;
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            };
+            handleListUserWithReward();
+        }
+        
+    }, [modalVisible]);
 
     const handleOpenModal = (userid) => {
         console.log("Opening modal...");
@@ -78,7 +105,11 @@ const DetailEvent = () => {
             if (selected === 'Đã hiến') {
                 statususer = "1";
             } else {
-                statususer = "0";
+                if (selected === 'Đang chờ hiến') {
+                    statususer = "0";
+                } else {
+                    statususer = "-1";
+                }
             }
             console.log('status', statususer);
             console.log('userid', userId);
@@ -117,6 +148,7 @@ const DetailEvent = () => {
     }
     const statusHienMau = [
         { key: 'Đã hiến', value: 'Đã hiến' },
+        { key: 'Đang chờ hiến', value: 'Đang chờ hiến' },
         { key: 'Chưa hiến', value: 'Chưa hiến' },
 
         // Thêm các nhóm máu khác nếu cần
@@ -305,23 +337,37 @@ const DetailEvent = () => {
                 <View className="bg-white p-2 rounded-lg shadow-md">
                     {/* Header */}
                     <View className="flex-row border-b border-gray-200">
-                        <Text className="w-1/6 text-center font-bold text-[14px]">STT</Text>
-                        <Text className="w-1/3 text-center font-bold text-[14px]">Họ tên</Text>
-                        <Text className="w-1/4 text-center font-bold text-[14px]">Tình trạng</Text>
-                        <Text className="w-1/4 text-center font-bold text-[14px]">Thao tác</Text>
+                        <Text className="w-1/12 text-center font-bold text-[12px]">STT</Text>
+                        <Text className="w-1/3 text-center font-bold text-[12px]">Họ tên</Text>
+                        <Text className="w-1/6 text-center font-bold text-[12px]">Điểm thưởng</Text>
+                        <Text className="w-1/6 text-center font-bold text-[12px]">Tình trạng</Text>
+                        <Text className="w-1/4 text-center font-bold text-[12px]">Thao tác</Text>
                     </View>
 
                     {/* Data Rows */}
-                    {eventDetail.listusers.user.map((item, index) => (
+                    {data.map((item, index) => (
                         <View key={index} className="flex-row border-b border-gray-200">
-                            <Text className="w-1/6 text-center text-[14px]">{index + 1}</Text>
-                            <Text className="w-1/3 text-center text-[14px]">{item.username}</Text>
-                            <Text className="w-1/4 text-center text-[14px]">{item.status_user === "0" ? "Chưa hiến" : "Đã hiến"}</Text>
-                            <TouchableOpacity
-                                onPress={() => handleOpenModal(item.userid)}
-                                className="w-1/4 flex items-center justify-center text-[14px]">
-                                <AntDesign name="edit" size={24} color="black" />
-                            </TouchableOpacity>
+                            <Text className="w-1/12 text-center text-[12px]">{index + 1}</Text>
+                            <Text className="w-1/3 text-center text-[12px]">{item.username}</Text>
+                            <Text className="w-1/6 text-center text-[12px]">{item.reward}</Text>
+                            <Text className="w-1/6 text-center text-[12px]">
+                                {item.status_user === "-1"
+                                    ? "Chưa hiến"
+                                    : item.status_user === "0"
+                                        ? "Đang chờ hiến"
+                                        : "Đã hiến"}
+                            </Text>
+                            {item.status_user === "1" ? (
+                                <Text className="w-1/3 flex items-center justify-center text-[12px] text-blue-500">
+                                    Hiến thành công
+                                </Text>
+                            ) : (
+                                <TouchableOpacity
+                                    onPress={() => handleOpenModal(item.userid)}
+                                    className="w-1/4 flex items-center justify-center text-[12px]">
+                                    <AntDesign name="edit" size={24} color="black" />
+                                </TouchableOpacity>
+                            )}
                         </View>
                     ))}
                 </View>
