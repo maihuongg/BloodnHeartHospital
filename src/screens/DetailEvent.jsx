@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useId } from 'react';
-import { View, Text, Image, ScrollView, Modal, TextInput, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, Modal, Button, TextInput, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
@@ -19,6 +19,9 @@ import {
     eventProfileSuccess,
     eventProfileFailed,
 } from "../redux/eventSlice";
+import Stepper from 'react-native-step-indicator'; // Đảm bảo bạn import Stepper từ thư viện react-native-step-indicator
+import StepIndicator from 'react-native-step-indicator';
+
 const DetailEvent = () => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
@@ -81,13 +84,78 @@ const DetailEvent = () => {
             };
             handleListUserWithReward();
         }
-        
-    }, [modalVisible]);
 
-    const handleOpenModal = (userid) => {
+    }, [modalVisible]);
+    const steps = [
+        { label: 'Kiểm tra tiêu chuẩn máu', description: 'Đang kiểm tra chất lượng máu của người hiến.' },
+        { label: 'Đang chờ hiến máu', description: 'Người dùng đang chờ để hiến máu.' },
+        { label: 'Đang hiến máu', description: 'Người dùng đang hiến máu.' },
+        { label: 'Đã hiến máu xong', description: 'Người dùng đã hoàn thành quá trình hiến máu.' },
+    ];
+    const stepIndicatorStyles = {
+        stepIndicatorSize: 30,
+        currentStepIndicatorSize: 40,
+        separatorStrokeWidth: 3,
+        currentStepStrokeWidth: 5,
+        stepStrokeCurrentColor: '#fe7013',
+        separatorFinishedColor: '#fe7013',
+        separatorUnFinishedColor: '#aaaaaa',
+        stepIndicatorFinishedColor: '#fe7013',
+        stepIndicatorUnFinishedColor: '#aaaaaa',
+        stepIndicatorCurrentColor: '#ffffff',
+        stepIndicatorLabelFontSize: 15,
+        currentStepIndicatorLabelFontSize: 15,
+        stepIndicatorLabelCurrentColor: '#000000',
+        stepIndicatorLabelFinishedColor: '#ffffff',
+        stepIndicatorLabelUnFinishedColor: 'rgba(255,255,255,0.5)',
+        labelColor: '#666666',
+        labelSize: 15,
+        currentStepLabelColor: '#fe7013',
+    };
+
+
+    const handleOpenModal = async(userId) => {
         console.log("Opening modal...");
-        setUserId(userid);
+        setUserId(userId);
+        console.log('userId selected:', userId)
         setModalVisible(true);
+        try {
+            const response1 = await fetch(`${baseUrl}/v1/hospital/find-user-in-event/?eventId=${eventId}&userId=${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (!response1.ok) {
+                const err = await response1.json();
+                // showNotificationErr(err.message);
+            } else {
+                const dataUserProfile = await response1.json();
+                console.log('dataUserProfile:', dataUserProfile)
+
+                const blood_status = dataUserProfile.blood_status;
+                console.log(' blood_status: ', blood_status)
+                setBloodStatus(blood_status);
+
+                const status_user = dataUserProfile.status_user;
+                if (blood_status == null)
+                    setActiveStep(0);
+                if (bloodStatus == 0) {
+                    setActiveStep(1); // Directly set to end step if not qualified
+                }
+                if (blood_status == 1 && status_user == -1) {
+                    setActiveStep(1);
+                }
+                if (blood_status == 1 && status_user == 0) {
+                    setActiveStep(2);
+                }
+                if (blood_status == 1 && status_user == 1) {
+                    setActiveStep(3);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
     const handleCloseModal = () => {
         console.log("Opening modal...");
@@ -153,7 +221,96 @@ const DetailEvent = () => {
 
         // Thêm các nhóm máu khác nếu cần
     ];
+    const handleNext = async() => {
+        if (activeStep === 0) {
+            // Gọi API để cập nhật blood_status và description
+            try {
+                const updateBloodStatus = {
+                    eventId: eventId,
+                    userId: userId,
+                    bloodStatus: bloodStatus,
+                    description: description,
+                }
+                const response = await fetch(`${baseUrl}/v1/hospital/update-blood-status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json', token: `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(updateBloodStatus),
+                });
+                if (!response.ok) {
+                    throw new Error('Cập nhật không thành công');
+                }
+                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            } catch (error) {
+                console.error('Lỗi khi cập nhật:', error);
+                // Xử lý lỗi khi cập nhật không thành công
+            }
+        }
+        if (activeStep === 1) {
+            // 
+            try {
+                const updateCheckinData = {
+                    eventId: eventId,
+                    userId: userId,
+                    checkin_time: new Date(), // Assuming this is the current time
+                    status_user: 0, // Assuming this is the status update value
+                };
 
+                const response = await fetch(`${baseUrl}/v1/hospital/update-checkin`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json', token: `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(updateCheckinData),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Cập nhật không thành công');
+                }
+                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            } catch (error) {
+                console.error('Lỗi khi cập nhật:', error);
+                // Xử lý lỗi khi cập nhật không thành công
+            }
+        }
+        if (activeStep === 2) {
+            // 
+            try {
+                const updateCheckoutData = {
+                    eventId: eventId,
+                    userId: userId,
+                    checkout_time: new Date(), // Assuming this is the current time
+                    status_user: 1, // Assuming this is the status update value
+                };
+
+                const response = await fetch(`${baseUrl}/v1/hospital/update-checkout`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json', token: `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(updateCheckoutData),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Cập nhật không thành công');
+                }
+                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            } catch (error) {
+                console.error('Lỗi khi cập nhật:', error);
+                // Xử lý lỗi khi cập nhật không thành công
+            }
+        }
+        // setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    };
+
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    };
+
+    const handleReset = () => {
+        setActiveStep(0);
+    };
 
     const handleUpdateInforEvent = async () => {
         if (isEmpty(eventName) || isEmpty(address)) {
@@ -196,7 +353,9 @@ const DetailEvent = () => {
         }
 
     }
-
+    const [bloodStatus, setBloodStatus] = useState('');
+    const [description, setDescription] = useState('');
+    const [activeStep, setActiveStep] = useState(0);
     return (
         <ScrollView>
             <SafeAreaView className=" flex-1">
@@ -371,6 +530,7 @@ const DetailEvent = () => {
                         </View>
                     ))}
                 </View>
+
                 <Modal
                     animationType="slide"
                     transparent={true}
@@ -379,43 +539,94 @@ const DetailEvent = () => {
                         setModalVisible(!modalVisible);
                     }}
                 >
-                    <View className="flex-1 bg-rnb justify-center items-center">
-                        <View className="h-[85%] w-[95%]">
-                            {/* Phần nội dung của modal */}
-
-                            <View className=" mx-2 bg-white p-2 rounded-md ">
-                                {/* Đặt các trường để người dùng có thể chỉnh sửa thông tin */}
-                                <View className="bg-blue justify-center items-center">
-                                    <Text className="text-xl font-bold text-white mb-2"> Cập nhật trạng thái hiến máu</Text>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, width: '95%' }}>
+                            <StepIndicator
+                                customStyles={stepIndicatorStyles}
+                                currentPosition={activeStep}
+                                labels={steps.map(step => step.label)}
+                                stepCount={steps.length}
+                            />
+                            {activeStep === 0 && (
+                                <View>
+                                    <Text style={{ marginTop: 20, marginBottom: 20 }}>{steps[0].description}</Text>
+                                    <SelectList
+                                        setSelected={(val) => setBloodStatus(val)}
+                                        data={[
+                                            { key: '1', value: 'Máu đạt tiêu chuẩn' },
+                                            { key: '0', value: 'Máu không đạt tiêu chuẩn' }
+                                        ]}
+                                        placeholder="Chọn trạng thái máu"
+                                        boxStyles={{ width: '100%' }}
+                                    />
+                                    {bloodStatus === '0' && (
+                                        <SelectList
+                                            setSelected={(val) => setDescription(val)}
+                                            data={[
+                                                { key: 'Vừa uống rượu, bia', value: 'Vừa uống rượu, bia' },
+                                                { key: 'Có các bệnh mãn tính', value: 'Có các bệnh mãn tính' },
+                                                { key: 'Đang mắc các bệnh cấp tính', value: 'Đang mắc các bệnh cấp tính' },
+                                                { key: 'Đã nhiễm HIV, viêm gan B, C', value: 'Đã nhiễm HIV, viêm gan B, C' },
+                                                { key: 'Có nguy cơ cao lây nhiễm HIV, viêm gan B, C', value: 'Có nguy cơ cao lây nhiễm HIV, viêm gan B, C' },
+                                                { key: 'Nghiện ma túy', value: 'Nghiện ma túy' },
+                                                { key: 'Có quan hệ tình dục không an toàn', value: 'Có quan hệ tình dục không an toàn' },
+                                                { key: 'Nam giới có quan hệ tình dục với người cùng giới khác', value: 'Nam giới có quan hệ tình dục với người cùng giới khác' },
+                                                { key: 'Người đang bị bệnh thiếu máu', value: 'Người đang bị bệnh thiếu máu' }
+                                            ]}
+                                            placeholder="Lý do không đạt tiêu chuẩn"
+                                            boxStyles={{ width: '100%' }}
+                                        />
+                                    )}
                                 </View>
-                                <Text className="text-black text-[16px] font-bold my-2"> Trạng thái </Text>
+                            )}
 
-                                <SelectList
-                                    setSelected={(val) => setSelected(val)}
-                                    data={statusHienMau}
-                                    save="value"
+                            {activeStep === 1 && (
+                                <View>
+                                    <Text style={{ marginTop: 20, marginBottom: 20 }}>{steps[1].description}</Text>
+                                    {/* Thêm nội dung chi tiết cho bước 2 */}
+                                </View>
+                            )}
+
+                            {activeStep === 2 && (
+                                <View>
+                                    <Text style={{ marginTop: 20, marginBottom: 20 }}>{steps[2].description}</Text>
+                                    {/* Thêm nội dung chi tiết cho bước 3 */}
+                                </View>
+                            )}
+
+                            <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'flex-end' }}>
+                                <Button
+                                    title="Quay lại"
+                                    onPress={handleBack}
+                                    disabled={activeStep === 0}
                                 />
-                                <View className="flex-row mx-8 justify-center items-center">
-                                    <TouchableOpacity onPress={handleCloseModal}>
-                                        <View className="justify-center bg-red mt-2 px-6 py-2 rounded-md ">
-                                            <Text className="text-white font-bold text-[16px]">Hủy</Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={handleUpdateStatus}>
-                                        <View className="justify-center bg-blue ml-12 mt-2 px-6 py-2 rounded-md">
-                                            <Text className="text-white font-bold text-[16px]">Cập nhật</Text>
-                                        </View>
-                                    </TouchableOpacity>
-
-                                </View>
-
+                                <Button
+                                    title={activeStep === steps.length - 1 ? 'Hoàn thành' : 'Tiếp tục'}
+                                    onPress={handleNext}
+                                    color="#3498db"
+                                    style={{ marginLeft: 10 }}
+                                />
                             </View>
+
+                            {activeStep === steps.length - 1 && (
+                                <View style={{ marginTop: 20 }}>
+                                    <Text style={{ marginBottom: 20 }}>
+                                        {bloodStatus === '0' ? 'Không đủ tiêu chuẩn hiến máu' : 'Quá trình hoàn thành'}
+                                    </Text>
+                                    <Button
+                                        title="Đặt lại"
+                                        onPress={handleReset}
+                                        color="#3498db"
+                                    />
+                                </View>
+                            )}
                         </View>
                     </View>
-
                 </Modal>
+
+
             </SafeAreaView >
-        </ScrollView>
+        </ScrollView >
     );
 };
 export default DetailEvent;
