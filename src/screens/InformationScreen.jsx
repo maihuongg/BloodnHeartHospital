@@ -98,11 +98,11 @@ const InformationScreen = () => {
                 <Image
                     className="w-24 h-24 rounded-full ml-2"
                     source={{ uri: hospitalProfile?.images }} ></Image>
-                <View className="flex-column justify-center items-center ml-2">
-                    <Text className="text-black font-bold text-[18px] text-justify overflow-hidden whitespace-nowrap max-w-[220px]" >
+                <View className="flex-column">
+                    <Text className="text-black font-bold text-[17px]" >
                         {hospitalProfile?.hospitalName}
                     </Text>
-                    <Text className="text-black text-[16px]"> {hospitalProfile?.address}</Text>
+                    <Text className="text-black text-[16px] w-[45%]"> {hospitalProfile?.address}</Text>
                 </View>
             </View>
 

@@ -37,6 +37,9 @@ const DetailEvent = () => {
     const [modalVisible, setModalVisible] = useState(false)
     const [modalVisible1, setModalVisible1] = useState(false)
     const [showModal, setShowModal] = useState(false);
+    const [showModal1, setShowModal1] = useState(false);
+    const [showModal2, setShowModal2] = useState(false);
+    const [refresh, setRefresh] = useState(true);
     const [selected, setSelected] = useState(null); // Khai báo và gán giá trị cho biến selected
     const [userId, setUserId] = useState("");
     const [data, setData] = useState([]);
@@ -47,6 +50,8 @@ const DetailEvent = () => {
     const [address, setAddress] = useState(eventDetail?.address);
     const [showPicker1, setShowPicker1] = useState(false);
     const [showPicker2, setShowPicker2] = useState(false);
+    const [showPicker3, setShowPicker3] = useState(false);
+    const [showPicker4, setShowPicker4] = useState(false);
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date_start;
         setShowPicker1(false);
@@ -59,10 +64,68 @@ const DetailEvent = () => {
         setDate_end(currentDate);
     };
 
+    const onChange2 = (event, selectedDate) => {
+        const currentDate = selectedDate || birthDay;
+        setShowPicker3(false);
+        setbirthDay(currentDate);
+    };
+    const onChange3 = (event, selectedDate) => {
+        const currentDate = selectedDate || dateRegister;
+        setShowPicker4(false);
+        setDateRegister(currentDate);
+    };
+
     const minDate = new Date();
 
+    const [userid, setUserid] = useState("");
+    const [cccd, setCccd] = useState("");
+    const [fullName, setfullName] = useState("");
+    const [birthDay, setbirthDay] = useState(new Date());
+
+    const [gender, setGender] = useState("");
+    const [bloodgroup, setbloodGroup] = useState("");
+    const [address_user, setAddressUser] = useState("");
+    const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
+    const [datemin, setDatemin] = useState("");
+    const [datemax, setDatemax] = useState("");
+    const [dateRegister, setDateRegister] = useState(new Date());
+    const [amount_blood, setAmountblood] = useState(350);
+
+    const amountblood = [
+        { key: '350 ml', value: 350 },
+        { key: '250 ml', value: 250 },
+    ];
+
+    const bloodGroupData = [
+        { key: 'A', value: 'A' },
+        { key: 'B', value: 'B' },
+        { key: 'AB', value: 'AB' },
+        { key: 'O', value: 'O' },
+        { key: 'Rh+', value: 'Rh+' },
+        { key: 'Rh-', value: 'Rh-' },
+        { key: 'Không rõ', value: 'Không rõ' },
+
+        // Thêm các nhóm máu khác nếu cần
+    ];
+
+    const data_gender = [
+        { key: 'Nam', value: 'Nam' },
+        { key: 'Nữ', value: 'Nữ' },
+
+    ]
+
     useEffect(() => {
-        if (!modalVisible) {
+        const currentDate = new Date();
+        const min_Date = new Date(eventDetail.date_start);
+        console.log("date", new Date(eventDetail.date_start).toISOString().split('T')[0])
+        if (currentDate < min_Date) {
+            setDatemin(new Date(eventDetail.date_start).toISOString().split('T')[0]);
+        } else {
+            setDatemin(new Date().toISOString().split('T')[0]);
+        }
+        setDatemax((new Date(eventDetail.date_end)).toISOString().split('T')[0]);
+        if (!modalVisible || refresh) {
             const handleListUserWithReward = async () => {
                 try {
                     const response = await fetch(`${baseUrl}/v1/hospital/getuserwithreward/` + eventId, {
@@ -85,7 +148,7 @@ const DetailEvent = () => {
             handleListUserWithReward();
         }
 
-    }, [modalVisible]);
+    }, [modalVisible, setDatemin, setDatemax, refresh]);
     const steps = [
         { label: 'Kiểm tra tiêu chuẩn máu', description: 'Đang kiểm tra chất lượng máu của người hiến.' },
         { label: 'Đang chờ hiến máu', description: 'Người dùng đang chờ để hiến máu.' },
@@ -114,7 +177,7 @@ const DetailEvent = () => {
     };
 
 
-    const handleOpenModal = async(userId) => {
+    const handleOpenModal = async (userId) => {
         console.log("Opening modal...");
         setUserId(userId);
         console.log('userId selected:', userId)
@@ -221,7 +284,7 @@ const DetailEvent = () => {
 
         // Thêm các nhóm máu khác nếu cần
     ];
-    const handleNext = async() => {
+    const handleNext = async () => {
         if (activeStep === 0) {
             // Gọi API để cập nhật blood_status và description
             try {
@@ -356,6 +419,76 @@ const DetailEvent = () => {
     const [bloodStatus, setBloodStatus] = useState('');
     const [description, setDescription] = useState('');
     const [activeStep, setActiveStep] = useState(0);
+
+    const handleAddUserNotAccount = async () => {
+        const user = {
+            cccd: cccd,
+            fullName: fullName,
+            gender: gender,
+            birthDay: birthDay,
+            bloodgroup: bloodgroup,
+            address: address_user,
+            email: email,
+            phone: phone
+        };
+        try {
+            const response = await fetch(`${baseUrl}/v1/hospital/addusernotaccount`, {
+                method: 'POST',
+                body: JSON.stringify(user),
+                headers: {
+                    'Content-Type': 'application/json',
+                    token: `Bearer ${accessToken}`
+                }
+            });
+
+            if (!response.ok) {
+                Alert.alert('Thất bại', 'Đăng ký thất bại!');
+            } else {
+                const data = await response.json();
+                setUserid(data._id);
+                setShowModal1(true);
+            }
+        } catch (error) {
+            Alert.alert('Thất bại', 'Đăng ký thất bại!');
+        }
+    }
+    const handleContinute = () => {
+        setShowModal1(false);
+        setShowModal2(true);
+        setRefresh(false);
+    }
+
+    const handleRegisterEvent = async () => {
+        const register = {
+            eventId: eventDetail._id,
+            userId: userid,
+            bloodGroup: bloodgroup,
+            dateRegister: dateRegister,
+            amount_blood: amount_blood,
+        };
+        try {
+            const response = await fetch(`${baseUrl}/v1/hospital/event/register`, {
+                method: 'POST',
+                body: JSON.stringify(register),
+                headers: {
+                    'Content-Type': 'application/json',
+                    token: `Bearer ${accessToken}`
+                }
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                Alert.alert('Thất bại', err.message);
+
+            } else {
+                setShowModal2(false);
+                setShowModal(false);
+                Alert.alert('Thành công', 'Đăng ký sự kiện thành công.');
+                setRefresh(true);
+            }
+        } catch (error) {
+            Alert.alert('Lỗi', 'Đã xảy ra lỗi không mong muốn.');
+        }
+    }
     return (
         <ScrollView>
             <SafeAreaView className=" flex-1">
@@ -492,7 +625,239 @@ const DetailEvent = () => {
                 </View>
                 <View className="flex-row bg-metal items-center justify-center my-2 p-2">
                     <Text className="text-white font-bold text-[16px]">DANH SÁCH ĐĂNG KÝ SỰ KIỆN</Text>
+                    <View className="ml-auto">
+                        <TouchableOpacity onPress={() => setShowModal(true)}>
+                            <MaterialIcons name="add" size={25} color="white" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={showModal}
+                    onRequestClose={() => {
+                        setShowModal(!showModal);
+                    }}
+                >
+                    <View className="flex-1 bg-rnb justify-center items-center">
+                        <View className="h-[85%] w-[95%]">
+                            {/* Phần nội dung của modal */}
+                            <ScrollView>
+                                <View className=" mx-2 bg-white p-4 rounded-md ">
+                                    {/* Đặt các trường để người dùng có thể chỉnh sửa thông tin */}
+                                    <Text className="text-xl font-bold text-blue mb-2">Chỉnh sửa thông tin cá nhân</Text>
+                                    <Text className="text-black text-[16px] font-bold my-2"> CCCD/CMND </Text>
+                                    <TextInput
+                                        onChangeText={(text) => setCccd(text)}
+                                        placeholder="Nhập số CCCD/CMND"
+                                        className="border border-gray-300 rounded-md p-2" />
+
+                                    <Text className="text-black text-[16px] font-bold my-2"> Họ và tên </Text>
+                                    <TextInput
+                                        onChangeText={(text) => setfullName(text)}
+                                        placeholder="Họ và tên"
+                                        className="border border-gray-300 rounded-md p-2" />
+                                    <Text className="text-black text-[16px] font-bold my-2"> Ngày kết thúc </Text>
+                                    <View className="flex-row border rounded-md  my-2">
+                                        <Text className="text-black font-normal text-[16px] ml-2 my-4">{moment(birthDay).format('DD/MM/YYYY')}</Text>
+                                        <View className="ml-auto">
+                                            <TouchableOpacity className="my-2" onPress={() => setShowPicker3(true)} >
+                                                <MaterialIcons name="today" size={32} color="red" />
+                                            </TouchableOpacity>
+                                            {showPicker3 && (
+                                                <DateTimePicker
+                                                    testID="dateTimePicker2"
+                                                    value={new Date(birthDay)}
+                                                    mode="date"
+                                                    display="default"
+                                                    onChange={onChange2}
+                                                />
+                                            )}
+                                        </View>
+                                    </View>
+                                    <View className="flex-row">
+                                        <View className="flex-col w-[45%]">
+                                            <Text className="text-black text-[16px] font-bold my-2"> Giới tính </Text>
+                                            <SelectList
+                                                setSelected={(val) => setGender(val)}
+                                                data={data_gender}
+                                                save="value"
+                                            />
+
+                                        </View>
+                                        <View className="flex-col w-[45%] ml-auto">
+                                            <Text className="text-black text-[16px] font-bold my-2"> Nhóm máu </Text>
+                                            <SelectList
+                                                setSelected={(val) => setbloodGroup(val)}
+                                                data={bloodGroupData}
+                                                save="value"
+                                            />
+                                        </View>
+                                    </View>
+
+                                    <Text className="text-black text-[16px] font-bold my-2"> Email </Text>
+                                    <TextInput
+                                        onChangeText={(text) => setEmail(text)}
+                                        placeholder="Email"
+                                        className="border border-gray-300 rounded-md  p-2" />
+                                    <Text className="text-black text-[16px] font-bold my-2"> Số điện thoại </Text>
+                                    <TextInput
+                                        onChangeText={(text) => setPhone(text)}
+                                        placeholder="0955662301"
+                                        className="border border-gray-300 rounded-md  p-2" />
+                                    <Text className="text-black text-[16px] font-bold my-2"> Địa chỉ </Text>
+                                    <TextInput
+                                        onChangeText={(text) => setAddressUser(text)}
+                                        placeholder="1 Võ Văn Ngân, TP.Thủ Đức, TPHCM"
+                                        className="border border-gray-300 rounded-md  p-2" />
+                                    <View className="flex-row justify-center">
+                                        <TouchableOpacity onPress={handleAddUserNotAccount}>
+                                            <View className="justify-center bg-blue mx-auto my-4 p-3 rounded-md">
+                                                <Text className="text-white font-bold text-[16px]">Tiếp tục</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity className="ml-2" onPress={() => setShowModal(false)}>
+                                            <View className="justify-center bg-blue mx-auto my-4 p-3 rounded-md">
+                                                <Text className="text-white font-bold text-[16px]">Hủy</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </ScrollView>
+                        </View>
+                    </View>
+                </Modal>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={showModal1}
+                    onRequestClose={() => {
+                        setShowModal1(!showModal1);
+                    }}
+                >
+                    <View className="flex-1 bg-rnb justify-center items-center">
+                        <View className="h-[85%] w-[95%]">
+                            <View className=" mx-2 bg-white p-4 rounded-md ">
+                                <Text className="text-xl font-bold text-blue mb-2">Chọn lượng máu và ngày hiến máu</Text>
+                                <View className="flex-row  bg-[#d7faf5] mx-4 my-2">
+                                    <Text className="text-black font-bold text-[16px] my-4 mx-2">Ngày hiến máu: </Text>
+                                    <Text className="text-black font-normal text-[16px] my-4">{moment(dateRegister).format('DD/MM/YYYY')}</Text>
+                                    <View className="ml-auto">
+                                        <TouchableOpacity className="my-2" onPress={() => setShowPicker4(true)} >
+                                            <MaterialIcons name="today" size={32} color="red" />
+                                        </TouchableOpacity>
+                                        {showPicker4 && (
+                                            <DateTimePicker
+                                                testID="dateTimePicker3"
+                                                value={dateRegister}
+                                                mode="date"
+                                                display="default"
+                                                minimumDate={new Date(datemin)}
+                                                maximumDate={new Date(datemax)}
+                                                onChange={onChange3}
+                                            />
+                                        )}
+                                    </View>
+                                </View>
+                                <View className="flex-row mx-auto">
+                                    <Text className="text-black text-[16px] font-bold my-2"> Lượng máu: </Text>
+                                    <SelectList
+                                        setSelected={(val) => setAmountblood(val || amount_blood)}
+                                        data={amountblood}
+                                        save="value"
+                                    />
+                                </View>
+
+                                <View className="flex-row mx-auto">
+                                    <TouchableOpacity onPress={handleContinute}>
+                                        <View className="justify-center bg-blue mx-auto my-4 p-3 rounded-md">
+                                            <Text className="text-white font-bold text-[16px]">Tiếp tục</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => { showModal1(false) }}>
+                                        <View className="justify-center bg-blue mx-auto my-4 p-3 rounded-md">
+                                            <Text className="text-white font-bold text-[16px]">Hủy</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={showModal2}
+                    onRequestClose={() => {
+                        setShowModal2(!showModal2);
+                    }}
+                >
+                    <View className="flex-1 bg-rnb justify-center items-center">
+                        <View className="h-[85%] w-[100%]">
+                            <ScrollView>
+                                <View className=" mx-2 bg-white p-4 rounded-md ">
+                                    <Text className="text-xl font-bold text-blue mb-2">Xác nhận thông tin đăng ký</Text>
+                                    <View className="flex-row mx-2">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">CCCD/CMND: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{cccd}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Họ và tên: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{fullName}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Giới tính: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{gender}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Ngày sinh: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{moment(birthDay).format('DD/MM/YYYY')}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Nhóm máu: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{bloodgroup}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2 w-[60%]">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Địa chỉ liên lạc: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{address_user}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Email: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{email}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Số điện thoại: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{phone}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2 w-[60%]">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Sự kiện đăng ký: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{eventDetail?.eventName}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Ngày đăng ký hiến máu: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{moment(dateRegister).format('DD/MM/YYYY')}</Text>
+                                    </View>
+                                    <View className="flex-row mx-2">
+                                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Lượng máu hiến: </Text>
+                                        <Text className="text-black font-normal text-[16px] my-4">{amount_blood}ml</Text>
+                                    </View>
+                                    <View className="flex-row mx-auto">
+                                        <TouchableOpacity onPress={handleRegisterEvent}>
+                                            <View className="justify-center bg-blue mx-auto my-4 p-3 rounded-md">
+                                                <Text className="text-white font-bold text-[16px]">Xác nhận</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => setShowModal2(false)}>
+                                            <View className="justify-center bg-blue mx-auto my-4 p-3 rounded-md">
+                                                <Text className="text-white font-bold text-[16px]">Hủy</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </ScrollView>
+                        </View>
+                    </View>
+                </Modal>
                 <View className="bg-white p-2 rounded-lg shadow-md">
                     {/* Header */}
                     <View className="flex-row border-b border-gray-200">
