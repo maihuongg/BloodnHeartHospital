@@ -948,7 +948,12 @@ const DetailEvent = () => {
                             {activeStep === 1 && (
                                 <View>
                                     <Text style={{ marginTop: 20, marginBottom: 20 }}>{steps[1].description}</Text>
-                                    {/* Thêm nội dung chi tiết cho bước 2 */}
+                                    {bloodStatus === '0' ? (
+                                        <Text>Không đủ tiêu chuẩn hiến máu</Text>
+                                    ) : (
+                                        // Thêm nội dung chi tiết cho bước 2 khi bloodStatus không bằng 0
+                                        <Text>Nội dung bước 2</Text>
+                                    )}
                                 </View>
                             )}
 
