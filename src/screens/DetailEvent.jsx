@@ -488,6 +488,7 @@ const DetailEvent = () => {
             dateRegister: dateRegister,
             amount_blood: amount_blood,
         };
+        console.log("aaa", register);
         try {
             const response = await fetch(`${baseUrl}/v1/hospital/event/register`, {
                 method: 'POST',
@@ -497,11 +498,13 @@ const DetailEvent = () => {
                     token: `Bearer ${accessToken}`
                 }
             });
+            
             if (!response.ok) {
                 const err = await response.json();
                 Alert.alert('Thất bại', err.message);
 
             } else {
+                console.log("aafsfsa", register);
                 setShowModal2(false);
                 setShowModal(false);
                 Alert.alert('Thành công', 'Đăng ký sự kiện thành công.');
@@ -677,7 +680,7 @@ const DetailEvent = () => {
                             <ScrollView>
                                 <View className=" mx-2 bg-white p-4 rounded-md ">
                                     {/* Đặt các trường để người dùng có thể chỉnh sửa thông tin */}
-                                    <Text className="text-xl font-bold text-blue mb-2">Chỉnh sửa thông tin cá nhân</Text>
+                                    <Text className="text-xl font-bold text-blue mb-2">Đăng ký sự kiện</Text>
                                     <Text className="text-black text-[16px] font-bold my-2"> CCCD/CMND </Text>
                                     <TextInput
                                         onChangeText={(text) => setCccd(text)}
@@ -689,7 +692,7 @@ const DetailEvent = () => {
                                         onChangeText={(text) => setfullName(text)}
                                         placeholder="Họ và tên"
                                         className="border border-gray-300 rounded-md p-2" />
-                                    <Text className="text-black text-[16px] font-bold my-2"> Ngày kết thúc </Text>
+                                    <Text className="text-black text-[16px] font-bold my-2"> Ngày sinh </Text>
                                     <View className="flex-row border rounded-md  my-2">
                                         <Text className="text-black font-normal text-[16px] ml-2 my-4">{moment(birthDay).format('DD/MM/YYYY')}</Text>
                                         <View className="ml-auto">
