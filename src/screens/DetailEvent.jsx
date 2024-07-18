@@ -91,6 +91,8 @@ const DetailEvent = () => {
     const [datemax, setDatemax] = useState("");
     const [dateRegister, setDateRegister] = useState(new Date());
     const [amount_blood, setAmountblood] = useState(350);
+    const [listnotzero, setListnotzero] = useState(0);
+    const [listzero, setListzero] = useState(0);
 
     const amountblood = [
         { key: '350 ml', value: 350 },
@@ -147,8 +149,28 @@ const DetailEvent = () => {
             };
             handleListUserWithReward();
         }
+        const handleCountRegister = async () => {
+            try {
+                const response1 = await fetch(`${baseUrl}/v1/hospital/countregistereventbyaccount/` + eventId, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        token: `Bearer ${accessToken}`
+                    }
+                });
+                if (response1.ok) {
+                    const data1 = await response1.json();
+                    setListzero(data1.usersWithAccountIdZero);
+                    setListnotzero(data1.usersWithNonZeroAccountId);
+                }
+                else return 0;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+        handleCountRegister();
 
-    }, [modalVisible, setDatemin, setDatemax, refresh]);
+    }, [modalVisible, setDatemin, setDatemax, refresh, setListzero, setListnotzero]);
     const steps = [
         { label: 'Kiểm tra tiêu chuẩn máu', description: 'Đang kiểm tra chất lượng máu của người hiến.' },
         { label: 'Đang chờ hiến máu', description: 'Người dùng đang chờ để hiến máu.' },
@@ -527,6 +549,16 @@ const DetailEvent = () => {
                         <Text className="text-black font-bold text-[16px] my-4 mx-2">Số lượng đã đăng ký: </Text>
                         {/* <Text className="text-black font-normal text-[16px] my-4">{eventDetail?.listusers.count}/<Text className="text-black font-bold text-[16px]">{eventDetail?.amount}</Text></Text> */}
                         <Text className="text-black font-normal text-[16px] my-4">{eventDetail?.listusers.count}/<Text className="text-black font-bold text-[16px]"> {eventDetail?.amount}</Text></Text>
+                    </View>
+                    <View className="flex-row  bg-[#e7eaed] mx-4 my-2 justify-center">
+                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Số lượng đăng ký trên hệ thống: </Text>
+                        {/* <Text className="text-black font-normal text-[16px] my-4">{eventDetail?.listusers.count}/<Text className="text-black font-bold text-[16px]">{eventDetail?.amount}</Text></Text> */}
+                        <Text className="text-black font-normal text-[16px] my-4">{listnotzero}</Text>
+                    </View>
+                    <View className="flex-row  bg-[#e7eaed] mx-4 my-2 justify-center">
+                        <Text className="text-black font-bold text-[16px] my-4 mx-2">Số lượng đăng ký vãng lai: </Text>
+                        {/* <Text className="text-black font-normal text-[16px] my-4">{eventDetail?.listusers.count}/<Text className="text-black font-bold text-[16px]">{eventDetail?.amount}</Text></Text> */}
+                        <Text className="text-black font-normal text-[16px] my-4">{listzero}</Text>
                     </View>
 
                     <TouchableOpacity onPress={() => setModalVisible1(true)}>
@@ -990,6 +1022,15 @@ const DetailEvent = () => {
                                     />
                                 </View>
                             )}
+
+                            <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'center' }}>
+                                <Button
+                                    title={'Lưu cập nhật'}
+                                    onPress={handleCloseModal}
+                                    color="#3498db"
+                                    style={{ marginLeft: 10 }}
+                                />
+                            </View>
                         </View>
                     </View>
                 </Modal>
